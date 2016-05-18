@@ -31,8 +31,9 @@ apilevel = '2.0'
 
 
 class Cursor(object):
-    def __init__(self, csv):
-        self.csv = csv
+    def __init__(self, connection):
+        self.connection = connection
+        self._fieldnames = []
 
     def __enter__(self):
         return self
@@ -53,8 +54,11 @@ class Cursor(object):
         pass
 
     def execute(self, query):
-        self.fieldnames = query.split(',')
-        self.description = [(name, -1, -1, -1, -1, -1, False) for name in self.fieldnames]
+        self._fieldnames = query.split(',')
+
+    @property
+    def description(self)
+        return [(name, -1, -1, -1, -1, -1, False) for name in self._fieldnames]
         # TODO: csvreader
 
     def fetchone(self):
