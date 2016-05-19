@@ -60,7 +60,7 @@ class Cursor(object):
     def execute(self, query):
         self._fieldnames = query.split(',')
         if isinstance(self.conn._path, io.StringIO):
-            self._stringio = _path
+            self._stringio = self.conn._path
         else:
             self._stringio = open(self.conn._path, 'r', encoding=self.conn._encoding)
         header = self._stringio.readline().strip()
