@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 ##############################################################################
 # The MIT License (MIT)
 #
@@ -30,11 +29,15 @@ VERSION = (0, 1, 0)
 __version__ = '%s.%s.%s' % VERSION
 apilevel = '2.0'
 
+class Error(Exception):
+    pass
+
 
 class Cursor(object):
     def __init__(self, conn):
         self.conn = conn
         self._fieldnames = []
+        self._reader = None
 
     def __enter__(self):
         return self
@@ -63,7 +66,7 @@ class Cursor(object):
                 self.conn._path, 'r', encoding=self.conn._encoding
             )
         header = self._stringio.readline().strip()
-        self.reader = csv.DictReader(
+        self._reader = csv.DictReader(
             self._stringio,
             fieldnames=header.split(','),
             delimiter=self.conn._delimiter,
@@ -73,9 +76,17 @@ class Cursor(object):
     def description(self):
         return [(name, -1, -1, -1, -1, -1, True) for name in self._fieldnames]
 
-    def fetchone(self):
-        r = next(self.reader)
+    def _fetchone(self):
+        if self._reader is None:
+            raise Error("Not call execute().")
+        r = next(self._reader)
         return tuple([r.get(f) for f in self._fieldnames])
+
+    def fetchone(self):
+        try:
+            return self._fetchone()
+        except StopIteration:
+            return None
 
     def fetchmany(self, size=1):
         rs = []
@@ -91,6 +102,7 @@ class Cursor(object):
 
     def close(self):
         self._stringio.close()
+        self._reader = None
 
     @property
     def rowcount(self):
@@ -100,7 +112,7 @@ class Cursor(object):
         return self
 
     def __next__(self):
-        r = self.fetchone()
+        r = self._fetchone()
         if not r:
             raise StopIteration()
         return r
