@@ -23,6 +23,7 @@
 # SOFTWARE.
 ##############################################################################
 # https://github.com/nakagami/csvdb/
+import io
 import csv
 
 VERSION = (0, 1, 0)
@@ -31,8 +32,8 @@ apilevel = '2.0'
 
 
 class Cursor(object):
-    def __init__(self, connection):
-        self.connection = connection
+    def __init__(self, conn):
+        self.conn = conn
         self._fieldnames = []
 
     def __enter__(self):
@@ -55,15 +56,26 @@ class Cursor(object):
 
     def execute(self, query):
         self._fieldnames = query.split(',')
+        if isinstance(self.conn._path, io.StringIO):
+            self._stringio = _path
+        else:
+            self._stringio = open(
+                self.conn._path, 'r', encoding=self.conn._encoding
+            )
+        header = self._stringio.readline().strip()
+        self.reader = csv.DictReader(
+            self._stringio,
+            fieldnames=header.split(','),
+            delimiter=self.conn._delimiter,
+        )
 
     @property
-    def description(self)
-        return [(name, -1, -1, -1, -1, -1, False) for name in self._fieldnames]
-        # TODO: csvreader
+    def description(self):
+        return [(name, -1, -1, -1, -1, -1, True) for name in self._fieldnames]
 
     def fetchone(self):
-        # TODO:
-        pass
+        r = next(self.reader)
+        return tuple([r.get(f) for f in self._fieldnames])
 
     def fetchmany(self, size=1):
         rs = []
@@ -78,8 +90,7 @@ class Cursor(object):
         return list(self)
 
     def close(self):
-        # TODO:
-        pass
+        self._stringio.close()
 
     @property
     def rowcount(self):
@@ -96,9 +107,10 @@ class Cursor(object):
 
 
 class Connection(object):
-    def __init__(self, fname, enc='utf-8', delimiter=',')
-        self.reader = csv.DictReader(csvfile)
-        pass
+    def __init__(self, path, encoding='utf-8', delimiter=','):
+        self._path = path
+        self._encoding = encoding
+        self._delimiter = delimiter
 
     def __enter__(self):
         return self
@@ -110,5 +122,7 @@ class Connection(object):
         return Cursor(self)
 
     def close(self):
-        # TODO:
         pass
+
+def connect(path, encoding='utf-8', delimiter=','):
+    return Connection(path, encoding, delimiter)
