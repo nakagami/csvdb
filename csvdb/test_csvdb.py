@@ -42,5 +42,21 @@ A,B,C
             [('1','3'),('a','c'),('A','C')]
         )
 
+    def test_null_blank_csv(self):
+        conn = csvdb.connect(io.StringIO(
+"""aaa,bbb,ccc
+1,2,
+a,,c
+A,
+
+x
+"""))
+        cur = conn.cursor()
+        cur.execute('aaa,bbb,ccc')
+        self.assertEqual(
+            cur.fetchall(),
+            [('1','2', ''),('a','', 'c'),('A','', None),('x', None, None)]
+        )
+
 if __name__ == "__main__":
     unittest.main()
