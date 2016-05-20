@@ -48,6 +48,7 @@ A,B,C
 1,2,
 a,,c
 A,
+,
 
 x
 """))
@@ -55,7 +56,7 @@ x
         cur.execute('aaa,bbb,ccc')
         self.assertEqual(
             cur.fetchall(),
-            [('1','2', ''),('a','', 'c'),('A','', None),('x', None, None)]
+            [('1','2', ''),('a','', 'c'),('A','', None),('','', None),('x', None, None)]
         )
 
 if __name__ == "__main__":
