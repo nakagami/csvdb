@@ -36,10 +36,18 @@ a,b,c
 A,B,C
 """))
         cur = conn.cursor()
-        cur.execute('aaa,ccc')
+        cur.execute('ccc,aaa')
+        self.assertEqual(
+            [d[0] for d in cur.description],
+            ['ccc', 'aaa']
+        )
+        self.assertEqual(
+            [d[6] for d in cur.description],
+            [True, False]
+        )
         self.assertEqual(
             cur.fetchall(),
-            [('1','3'),('a','c'),('A','C')]
+            [('3','1'),('c','a'),('C','A')]
         )
 
     def test_null_blank_csv(self):

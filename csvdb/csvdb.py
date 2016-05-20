@@ -63,16 +63,16 @@ class Cursor(object):
             self._stringio = self.conn._path
         else:
             self._stringio = open(self.conn._path, 'r', encoding=self.conn._encoding)
-        header = self._stringio.readline().strip()
+        self._header = self._stringio.readline().strip().split(',')
         self._reader = csv.DictReader(
             self._stringio,
-            fieldnames=header.split(','),
+            fieldnames=self._header,
             delimiter=self.conn._delimiter,
         )
 
     @property
     def description(self):
-        return [(name, -1, -1, -1, -1, -1, True) for name in self._fieldnames]
+        return [(name, -1, -1, -1, -1, -1, name != self._header[0]) for name in self._fieldnames]
 
     def _fetchone(self):
         if self._reader is None:
