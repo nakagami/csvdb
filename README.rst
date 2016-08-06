@@ -23,7 +23,7 @@ Example
 ::
 
    import csvdb
-   conn = minitds.connect('/foo/bar/baz.csv')
+   conn = csvdb.connect('/foo/bar/baz.csv')
    cur = conn.cursor()
    cur.execute('field1,field2')
    for r in cur.fetchall():
