@@ -63,7 +63,7 @@ class Cursor(object):
             self._stringio = self.conn._path
         else:
             self._stringio = open(self.conn._path, 'r', encoding=self.conn._encoding)
-        self._header = self._stringio.readline().strip().split(',')
+        self._header = self._stringio.readline().strip().split(self.conn._delimiter)
         self._reader = csv.DictReader(
             self._stringio,
             fieldnames=self._header,
